@@ -18,6 +18,8 @@ namespace WindowsFormsApp1
         Mat processedImage;
         Mat originImage;
         string imagePath;
+        string _defectPositions;
+        string _defectSizes;
         public Form1()
         {
             InitializeComponent();
@@ -95,6 +97,33 @@ namespace WindowsFormsApp1
             pictureBox1.Refresh(); // 폼 리프레시
             originImage = mat.Clone();
         }
+        private void PictureBox1_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (originImage == null || originImage.Empty())
+                return;
+
+            int zoomSize = 100;
+
+            // PictureBox1 크기와 원본 이미지 크기의 비율 계산
+            double scaleX = (double)originImage.Width / pictureBox1.Width;
+            double scaleY = (double)originImage.Height / pictureBox1.Height;
+
+            // 마우스 좌표를 원본 이미지 좌표로 변환
+            int x = (int)(e.X * scaleX);
+            int y = (int)(e.Y * scaleY);
+
+            // ROI 좌표 계산 (이미지 경계 초과 방지)
+            x = Math.Max(0, Math.Min(x - zoomSize / 2, originImage.Width - zoomSize));
+            y = Math.Max(0, Math.Min(y - zoomSize / 2, originImage.Height - zoomSize));
+
+            Rect zoomRect = new Rect(x, y, zoomSize, zoomSize);
+            //에러 방지용 주석
+            // `processedImage`에서 해당 영역 추출 후 확대
+            Mat zoomedImage = new Mat(processedImage, zoomRect);
+            Cv2.Resize(zoomedImage, zoomedImage, new OpenCvSharp.Size(zoomSize * 3, zoomSize * 3));
+
+            pictureBox2.Image = BitmapConverter.ToBitmap(zoomedImage);
+        }
 
         private void button2_Click(object sender, EventArgs e)
         {
@@ -106,17 +135,28 @@ namespace WindowsFormsApp1
             }
 
             // 예시 데이터: 실제로는 테이블이나 파일 등에서 가져올 수 있습니다.
-            string defectPositions = "898:816,1207:564,1932:175,1205:1250,793:2648,1203:2402,2399:3096,3120:2871,3600:2867,3649:2853,4490:2666";
-            string defectSizes = "2:2,2:2,2:3,2:2,50:50,2:2,2:2,2:2,2:2,2:2,2:2";
+            //string defectPositions = "898:816,1207:564,1932:175,1205:1250,793:2648,1203:2402,2399:3096,3120:2871,3600:2867,3649:2853,4490:2666";
+            //string defectSizes = "2:2,2:2,2:3,2:2,50:50,2:2,2:2,2:2,2:2,2:2,2:2";
             // 하이라이트된 이미지를 생성 (빨간색, 두께 2)
             //Mat resultImage = WaferDefectHighlighter.HighlightDefects(originImage, defectPositions, defectSizes, Scalar.Red, 2);
-            Mat resultImage = WaferDefectHighlighter.HighlightDefectsByType(originImage, defectPositions, defectSizes, Scalar.Red, Scalar.Blue, 15);
+            Mat resultImage = WaferDefectHighlighter.HighlightDefectsByType(originImage, _defectPositions, _defectSizes, Scalar.Red, Scalar.Blue, 15);
 
             // 결과 이미지를 화면에 표시
             //LoadAndDisplayProcessedImage(resultImage);
             processedImage = resultImage.Clone();
 
             LoadAndDisplayOriginalImage(resultImage);
+        }
+
+        private void textBox1_TextChanged(object sender, EventArgs e)
+        {
+            _defectPositions = textBox1.Text;
+
+        }
+
+        private void textBox2_TextChanged(object sender, EventArgs e)
+        {
+            _defectSizes = textBox2.Text;
         }
     }
 }
