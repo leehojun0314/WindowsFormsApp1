@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace WindowsFormsApp1
 {
@@ -79,6 +80,17 @@ namespace WindowsFormsApp1
             Mat output = image.Clone();
 
             // 좌표와 크기 문자열을 콤마(,) 기준으로 분리
+            if (defectPositions == null)
+            {
+                MessageBox.Show("결함 좌표가 없습니다.", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return output;
+            }
+            if(defectSizes == null)
+            {
+                MessageBox.Show("결함 크기가 없습니다.", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return output;
+            }
+
             string[] posArray = defectPositions.Split(',');
             string[] sizeArray = defectSizes.Split(',');
 

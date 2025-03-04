@@ -85,17 +85,12 @@ namespace WindowsFormsApp1
             pictureBox2.Image = null;
             processedImage = originImage.Clone();
         }
-        private void LoadAndDisplayProcessedImage(Mat mat)
-        {
-            pictureBox2.Image = BitmapConverter.ToBitmap(mat);
-            pictureBox2.Refresh(); // 폼 리프레시
-            processedImage = mat.Clone();
-        }
+        
         private void LoadAndDisplayOriginalImage(Mat mat)
         {
             pictureBox1.Image = BitmapConverter.ToBitmap(mat);
             pictureBox1.Refresh(); // 폼 리프레시
-            originImage = mat.Clone();
+            //originImage = mat.Clone();
         }
         private void PictureBox1_MouseMove(object sender, MouseEventArgs e)
         {
@@ -125,29 +120,6 @@ namespace WindowsFormsApp1
             pictureBox2.Image = BitmapConverter.ToBitmap(zoomedImage);
         }
 
-        private void button2_Click(object sender, EventArgs e)
-        {
-            //LoadAndDisplayProcessedImage(EmguLib.RunHeatmapEmgu(originImage));
-            if (originImage == null || originImage.Empty())
-            {
-                MessageBox.Show("처리할 이미지가 없습니다.", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
-            // 예시 데이터: 실제로는 테이블이나 파일 등에서 가져올 수 있습니다.
-            //string defectPositions = "898:816,1207:564,1932:175,1205:1250,793:2648,1203:2402,2399:3096,3120:2871,3600:2867,3649:2853,4490:2666";
-            //string defectSizes = "2:2,2:2,2:3,2:2,50:50,2:2,2:2,2:2,2:2,2:2,2:2";
-            // 하이라이트된 이미지를 생성 (빨간색, 두께 2)
-            //Mat resultImage = WaferDefectHighlighter.HighlightDefects(originImage, defectPositions, defectSizes, Scalar.Red, 2);
-            Mat resultImage = WaferDefectHighlighter.HighlightDefectsByType(originImage, _defectPositions, _defectSizes, Scalar.Red, Scalar.Blue, 15);
-
-            // 결과 이미지를 화면에 표시
-            //LoadAndDisplayProcessedImage(resultImage);
-            processedImage = resultImage.Clone();
-
-            LoadAndDisplayOriginalImage(resultImage);
-        }
-
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
             _defectPositions = textBox1.Text;
@@ -157,6 +129,37 @@ namespace WindowsFormsApp1
         private void textBox2_TextChanged(object sender, EventArgs e)
         {
             _defectSizes = textBox2.Text;
+        }
+
+        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        {
+            if (checkBox1.Checked)
+            {
+                //LoadAndDisplayProcessedImage(EmguLib.RunHeatmapEmgu(originImage));
+                if (originImage == null || originImage.Empty())
+                {
+                    MessageBox.Show("처리할 이미지가 없습니다.", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                // 예시 데이터: 실제로는 테이블이나 파일 등에서 가져올 수 있습니다.
+                //string defectPositions = "898:816,1207:564,1932:175,1205:1250,793:2648,1203:2402,2399:3096,3120:2871,3600:2867,3649:2853,4490:2666";
+                //string defectSizes = "2:2,2:2,2:3,2:2,50:50,2:2,2:2,2:2,2:2,2:2,2:2";
+                // 하이라이트된 이미지를 생성 (빨간색, 두께 2)
+                //Mat resultImage = WaferDefectHighlighter.HighlightDefects(originImage, defectPositions, defectSizes, Scalar.Red, 2);
+                Mat resultImage = WaferDefectHighlighter.HighlightDefectsByType(originImage, _defectPositions, _defectSizes, Scalar.Green, Scalar.Red, 15);
+
+                // 결과 이미지를 화면에 표시
+                //LoadAndDisplayProcessedImage(resultImage);
+                processedImage = resultImage.Clone();
+
+                LoadAndDisplayOriginalImage(resultImage);
+            }
+            else
+            {
+                Console.WriteLine("Highlight disabled");
+                LoadAndDisplayOriginalImage(originImage);
+            }
         }
     }
 }
